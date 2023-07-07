@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::fs::{self, File};
 use std::io::{self, prelude::*};
 
+// Replace with current dir when running
 const CLIENT_PATH: &'static str = "C:/projects/kcrp_string_hash/src/client_index.js";
 const SERVER_PATH: &'static str = "C:/projects/kcrp_string_hash/src/server_index.js";
 const CEF_PATH: &'static str = "C:/projects/kcrp_string_hash/src/cef_index.js";
