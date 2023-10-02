@@ -1,3 +1,5 @@
+mod test;
+
 use regex::Regex;
 use sha256::digest;
 use std::collections::HashMap;
