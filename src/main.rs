@@ -9,9 +9,9 @@ use std::io::{self, prelude::*};
 use std::path::PathBuf;
 
 // Replace with current dir when running
-const CLIENT_PATH: &'static str = "C:/projects/kcrp_string_hash/test_data/client_index.js";
-const SERVER_PATH: &'static str = "C:/projects/kcrp_string_hash/test_data/server_index.js";
-const CEF_PATH: &'static str = "C:/projects/kcrp_string_hash/test_data/cef_index.js";
+const CLIENT_PATH: &'static str = "C:/RAGEMP/server-files/client_packages/index.js";
+const SERVER_PATH: &'static str = "C:/RAGEMP/server-files/packages/KrookedCompany/index.js";
+const CEF_FOLDER_PATH: &'static str = "C:/RAGEMP/server-files/client_packages/package2/assets";
 
 struct EventHash {
     event: String,
@@ -30,7 +30,17 @@ impl EventHash {
 fn main() {
     let client_content = fs::read_to_string(CLIENT_PATH).expect("Unable to read the file");
     let server_content = fs::read_to_string(SERVER_PATH).expect("Unable to read the file");
-    let cef_content = fs::read_to_string(CEF_PATH).expect("Unable to read the file");
+
+    let cef_file_option = find_js_file(CEF_FOLDER_PATH);
+
+    let cef_file_name = match cef_file_option {
+        None => panic!("Unable to find cef index.js file"),
+        Some(file_name) => file_name,
+    };
+
+    let cef_path = format!("{CEF_FOLDER_PATH}/{cef_file_name}");
+    let cef_content = fs::read_to_string(format!("{CEF_FOLDER_PATH}/{cef_file_name}"))
+        .expect("Unable to read the file");
 
     let re = Regex::new(r#"("server:[a-zA-Z-0-9:-_]*\")|(\"client:[a-zA-Z-0-9:-_]*\")"#).unwrap();
 
@@ -39,7 +49,7 @@ fn main() {
     fill_hash_map(
         client_content,
         server_content,
-        cef_content,
+        cef_content.clone(),
         &mut event_hashes,
         &re,
     );
@@ -47,11 +57,22 @@ fn main() {
     let paths: Vec<PathBuf> = vec![
         PathBuf::from(CLIENT_PATH),
         PathBuf::from(SERVER_PATH),
-        PathBuf::from(CEF_PATH),
+        PathBuf::from(cef_path),
     ];
     for path in paths {
         let _ = replace_event_names_in_files_with_hashes(&event_hashes, path.as_os_str());
     }
+}
+
+fn find_js_file(folder_path: &str) -> Option<String> {
+    fs::read_dir(folder_path)
+        .ok()?
+        .filter_map(|entry| {
+            entry
+                .ok()
+                .and_then(|e| e.file_name().to_str().map(String::from))
+        })
+        .find(|file_name| file_name.ends_with(".js") && file_name.starts_with("index-"))
 }
 
 fn replace_event_names_in_files_with_hashes(

@@ -17,8 +17,8 @@ mod tests {
             Some code with "client:event1" and "server:event2"
         "#;
 
-        let test_client_path = "test_files/client_index_test.js";
-        let test_server_path = "test_files/server_index_test.js";
+        let test_client_path = "test_data/client_index_test.js";
+        let test_server_path = "test_data/server_index_test.js";
 
         // Create test file
         fs::write(test_client_path, test_data).expect("Unable to write the test file");
@@ -52,6 +52,9 @@ mod tests {
         let server_content = r#"
             Some code with "server:event3" and "server:event4:hejsan"
         "#;
+        let cef_content = r#"
+            Some code with "server:event5" and "server:event6:hejsan"
+        "#;
 
         let mut event_hashes: HashMap<String, String> = HashMap::new();
         let re =
@@ -60,12 +63,12 @@ mod tests {
         fill_hash_map(
             client_content.to_string(),
             server_content.to_string(),
-            String::new(),
+            cef_content.to_string(),
             &mut event_hashes,
             &re,
         );
 
-        assert_eq!(event_hashes.len(), 4);
+        assert_eq!(event_hashes.len(), 6);
         assert_eq!(
             event_hashes.get("client:event1:hejsan"),
             Some(&digest("client:event1:hejsan"))
@@ -73,6 +76,10 @@ mod tests {
         assert_eq!(
             event_hashes.get("server:event4:hejsan"),
             Some(&digest("server:event4:hejsan"))
+        );
+        assert_eq!(
+            event_hashes.get("server:event6:hejsan"),
+            Some(&digest("server:event6:hejsan"))
         );
     }
 }
